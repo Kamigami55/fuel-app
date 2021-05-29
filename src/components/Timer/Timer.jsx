@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { createMachine, assign } from 'xstate';
+import { createMachine } from 'xstate';
 import { useMachine } from '@xstate/react';
 
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import Button from '@material-ui/core/Button';
+
+import useInterval from '../../utils/useInterval';
 
 // const WORK_TIME_IN_SEC = 25 * 60;
 const WORK_TIME_IN_SEC = 5;
@@ -46,22 +48,15 @@ function Timer() {
   const isTicking = current.matches('working');
   // const { count } = current.context;
 
-  // const [isTicking, setIsTicking] = useState(false);
   const [timeLeftSec, setTimeLeftSec] = useState(WORK_TIME_IN_SEC);
-  const [tickInterval, setTickInterval] = useState(null);
 
   const timeIsUp = () => {
-    console.log('eeeee');
     send('STOP');
-    // setIsTicking(false);
     setTimeLeftSec(0);
-    clearInterval(tickInterval);
-    setTickInterval(null);
     window.alert('Time is up');
   };
 
   const tickHandler = () => {
-    console.log(timeLeftSec);
     if (timeLeftSec <= 0) {
       timeIsUp();
       return;
@@ -69,13 +64,12 @@ function Timer() {
     setTimeLeftSec((prevTimeLeftSec) => prevTimeLeftSec - 1);
   };
 
+  useInterval(tickHandler, isTicking ? 1000 : null);
+
   const startTick = () => {
     if (isTicking) return;
     send('START');
-    // if (isTicking) return;
-    // setIsTicking(true);
     setTimeLeftSec(WORK_TIME_IN_SEC);
-    setTickInterval(setInterval(tickHandler, 1000));
   };
 
   const formattedTime = () => {
