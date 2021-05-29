@@ -53,7 +53,12 @@ function Timer() {
   const timeIsUp = () => {
     send('STOP');
     setTimeLeftSec(0);
-    window.alert('Time is up');
+
+    const notification = {
+      title: 'Time is up',
+      body: "It's time to have a short break",
+    };
+    new window.Notification(notification.title, notification);
   };
 
   const tickHandler = () => {
