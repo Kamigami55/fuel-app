@@ -57,7 +57,7 @@ export default class MenuBuilder {
       label: 'Fuel',
       submenu: [
         {
-          label: 'About ElectronReact',
+          label: 'About Fuel',
           selector: 'orderFrontStandardAboutPanel:',
         },
         { type: 'separator' },

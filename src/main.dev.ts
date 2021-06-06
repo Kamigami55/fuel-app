@@ -14,6 +14,8 @@ import path from 'path';
 import { app, BrowserWindow, shell } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
+import { menubar } from 'menubar';
+
 import MenuBuilder from './menu';
 
 export default class AppUpdater {
@@ -51,6 +53,23 @@ const installExtensions = async () => {
     .catch(console.log);
 };
 
+const RESOURCES_PATH = app.isPackaged
+  ? path.join(process.resourcesPath, 'assets')
+  : path.join(__dirname, '../assets');
+
+const getAssetPath = (...paths: string[]): string => {
+  return path.join(RESOURCES_PATH, ...paths);
+};
+
+const createTray = () => {
+  const mb = menubar({
+    icon: getAssetPath('trayIconTemplate.png'),
+  });
+  mb.on('ready', () => {
+    mb.tray.setTitle('20:00');
+  });
+};
+
 const createWindow = async () => {
   if (
     process.env.NODE_ENV === 'development' ||
@@ -58,14 +77,6 @@ const createWindow = async () => {
   ) {
     await installExtensions();
   }
-
-  const RESOURCES_PATH = app.isPackaged
-    ? path.join(process.resourcesPath, 'assets')
-    : path.join(__dirname, '../assets');
-
-  const getAssetPath = (...paths: string[]): string => {
-    return path.join(RESOURCES_PATH, ...paths);
-  };
 
   mainWindow = new BrowserWindow({
     show: false,
@@ -111,6 +122,11 @@ const createWindow = async () => {
   new AppUpdater();
 };
 
+const startUp = async () => {
+  await createWindow();
+  createTray();
+};
+
 /**
  * Add event listeners...
  */
@@ -123,7 +139,7 @@ app.on('window-all-closed', () => {
   }
 });
 
-app.whenReady().then(createWindow).catch(console.log);
+app.whenReady().then(startUp).catch(console.log);
 
 app.on('activate', () => {
   // On macOS it's common to re-create a window in the app when the
